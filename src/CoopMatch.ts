@@ -151,6 +151,11 @@ export class CoopMatch {
             return;
         }
 
+        if(info.m === "Ping" && info.t !== undefined && info.accountId !== undefined) {
+            this.Ping(info.accountId, info.t);
+            return;
+        }
+
         if(info.m === "SpawnPointForCoop") {
 
             this.SpawnPoint.x = info.x;
@@ -174,13 +179,6 @@ export class CoopMatch {
 
         if(info.m === undefined) { 
             this.LastUpdateDateTime = new Date(Date.now());
-            return;
-        }
-
-        console.log(`ProcessData: ${info.t}, ${info.accountId}, ${info.m}`);
-        if(info.t !== undefined && info.accountId !== undefined && info.m === "Ping") {
-            this.Ping(info.accountId, info.t);
-
             return;
         }
             
