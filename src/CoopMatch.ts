@@ -177,6 +177,7 @@ export class CoopMatch {
             return;
         }
 
+        console.log(`ProcessData: ${info.t}, ${info.accountId}, ${info.m}`);
         if(info.t !== undefined && info.accountId !== undefined && info.m === "Ping") {
             this.Ping(info.accountId, info.t);
 
