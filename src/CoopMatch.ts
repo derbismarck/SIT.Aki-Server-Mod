@@ -47,6 +47,7 @@ export class CoopMatch {
     SpawnPoint: any = { x: 0, y:0, z:0 }
 
     private SendLastDataInterval : NodeJS.Timer;
+    private SendPingInterval : NodeJS.Timer;
     private CheckStillRunningInterval: NodeJS.Timer;
 
     // A STATIC Dictonary of Coop Matches. The Key is the Account Id of the Player that created it
@@ -97,6 +98,15 @@ export class CoopMatch {
             }
 
         }, 1000);
+
+        this.SendPingInterval = setInterval(() => {
+
+            var dateOfPing = new Date(Date.now());
+            var dateOfPingString = `${dateOfPing.getHours()}:${dateOfPing.getMinutes()}:${dateOfPing.getSeconds()}:${dateOfPing.getMilliseconds()}`;
+            // console.log(dateOfPingString);
+            WebSocketHandler.Instance.sendToWebSockets(this.ConnectedPlayers, JSON.stringify({ ping: dateOfPingString }));
+
+        }, 2000);
 
         setTimeout(() => {
             this.CheckStillRunningInterval = setInterval(() => {
