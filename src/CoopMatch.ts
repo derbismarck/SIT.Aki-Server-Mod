@@ -152,7 +152,7 @@ export class CoopMatch {
         }
 
         if(info.m === "Ping" && info.t !== undefined && info.accountId !== undefined) {
-            this.Ping(info.accountId, info.t);
+                this.Ping(info.accountId, info.t);
             return;
         }
 
@@ -210,6 +210,16 @@ export class CoopMatch {
             }
             if(!foundExistingPlayer)
                 this.Characters.push(info);
+        }
+		
+        if(info.m == "Kill") {
+            // console.log(info);
+            for(var c of this.Characters) {
+                if (info.accountId == c.accountId) {
+					c.isDead = true;
+                    break;
+                }
+            }
         }
 
         this.LastUpdateDateTime = new Date(Date.now());
