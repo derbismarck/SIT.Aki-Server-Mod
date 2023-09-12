@@ -40,10 +40,7 @@ export class WebSocketHandler {
         
         ws.on("message", async function message(msg) 
         {
-
-            wsh.processMessage(msg);
-           
-
+            wsh.processMessage(msg, ws); // Pass the WebSocket instance as a parameter here
         });
 
         ws.on("close", async (code: number, reason: Buffer) =>
@@ -69,11 +66,11 @@ export class WebSocketHandler {
 
     }
 
-    private async processMessage(msg: RawData) {
+    private async processMessage(msg: RawData, ws: WebSocket.WebSocket) {
 
         const msgStr = msg.toString();
 
-        this.processMessageString(msgStr);
+        this.processMessageString(msgStr, ws);
     }
 
     private async processClose(ws: WebSocket, sessionId: string) {
@@ -87,9 +84,8 @@ export class WebSocketHandler {
 
     }
 
-
-    private async processMessageString(msgStr: string) {
-
+    private async processMessageString(msgStr: string, ws: WebSocket.WebSocket) {
+    
         // If is SIT serialized string -- This is NEVER stored.
         if(msgStr.startsWith("SIT")) {
             // console.log(`received ${msgStr}`);
@@ -119,10 +115,10 @@ export class WebSocketHandler {
 
         var jsonObject = JSON.parse(msgStr);
 
-        this.processObject(jsonObject);
+        this.processObject(jsonObject, ws);
     }
 
-    private async processObject(jsonObject: any) {
+    private async processObject(jsonObject: any, ws: WebSocket.WebSocket) {
 
         const match = CoopMatch.CoopMatches[jsonObject["serverId"]];
         if(match !== undefined) {
@@ -131,12 +127,19 @@ export class WebSocketHandler {
                 match.PlayerJoined(jsonObject["profileId"]);
             }
             else {
-                // console.log("found match");
                 match.ProcessData(jsonObject, this.logger);
             }
         }
 
-        this.sendToAllWebSockets(JSON.stringify(jsonObject));
+        this.sendToAllWebSocketsExcept(JSON.stringify(jsonObject), ws);
+    }
+    
+    public sendToAllWebSocketsExcept(data: string, ws: WebSocket.WebSocket) {
+        for(let session in this.webSockets) {
+            if(this.webSockets[session] !== ws && this.webSockets[session].readyState === WebSocket.OPEN) {
+                this.webSockets[session].send(data);
+            }
+        }
     }
 
     public sendToAllWebSockets(data: string) {
